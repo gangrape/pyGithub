@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ## Example
 
-```
+```python
 from pyGithub import Client
 
 token = "YOUR_GITHUB_TOKEN"
