@@ -1,0 +1,172 @@
+"""
+user.py
+"""
+class User:
+    """
+    Represents a GitHub user.
+    """
+    def __init__(self, user_data: dict) -> None:
+        self._user_data = user_data or {}
+
+
+    @property
+    def login(self) -> str:
+        return self._user_data.get("login")
+
+
+    @property
+    def id(self) -> int:
+        return self._user_data.get("id")
+
+
+    @property
+    def node_id(self) -> str:
+        return self._user_data.get("node_id")
+
+
+    @property
+    def avatar_url(self) -> str:
+        return self._user_data.get("avatar_url")
+
+
+    @property
+    def gravatar_id(self) -> str:
+        return self._user_data.get("gravatar_id")
+
+
+    @property
+    def url(self) -> str:
+        return self._user_data.get("url")
+
+
+    @property
+    def html_url(self) -> str:
+        return self._user_data.get("html_url")
+
+
+    @property
+    def followers_url(self) -> str:
+        return self._user_data.get("followers_url")
+
+
+    @property
+    def following_url(self) -> str:
+        return self._user_data.get("following_url")
+
+
+    @property
+    def gists_url(self) -> str:
+        return self._user_data.get("gists_url")
+
+
+    @property
+    def starred_url(self) -> str:
+        return self._user_data.get("starred_url")
+
+
+    @property
+    def subscriptions_url(self) -> str:
+        return self._user_data.get("subscriptions_url")
+
+
+    @property
+    def organizations_url(self) -> str:
+        return self._user_data.get("organizations_url")
+
+
+    @property
+    def repos_url(self) -> str:
+        return self._user_data.get("repos_url")
+
+
+    @property
+    def events_url(self) -> str:
+        return self._user_data.get("events_url")
+
+
+    @property
+    def received_events_url(self) -> str:
+        return self._user_data.get("received_events_url")
+
+
+    @property
+    def type(self) -> str:
+        return self._user_data.get("type")
+
+
+    @property
+    def site_admin(self) -> bool:
+        return self._user_data.get("site_admin")
+
+
+    @property
+    def name(self) -> str:
+        return self._user_data.get("name")
+
+
+    @property
+    def company(self) -> str:
+        return self._user_data.get("company")
+
+
+    @property
+    def blog(self) -> str:
+        return self._user_data.get("blog")
+
+
+    @property
+    def location(self) -> str:
+        return self._user_data.get("location")
+
+
+    @property
+    def email(self) -> str:
+        return self._user_data.get("email")
+
+
+    @property
+    def hireable(self) -> bool:
+        return self._user_data.get("hireable")
+
+
+    @property
+    def bio(self) -> str:
+        return self._user_data.get("bio")
+
+
+    @property
+    def twitter_username(self) -> str:
+        return self._user_data.get("twitter_username")
+
+
+    @property
+    def public_repos(self) -> int:
+        return self._user_data.get("public_repos")
+
+
+    @property
+    def public_gists(self) -> int:
+        return self._user_data.get("public_gists")
+
+
+    @property
+    def followers(self) -> int:
+        return self._user_data.get("followers")
+
+
+    @property
+    def following(self) -> int:
+        return self._user_data.get("following")
+
+
+    @property
+    def created_at(self) -> str:
+        return self._user_data.get("created_at")
+
+
+    @property
+    def updated_at(self) -> str:
+        return self._user_data.get("updated_at")
+
+    def __repr__(self) -> str:
+        return f"User(login={self.login}, id={self.id})"
