@@ -1,5 +1,11 @@
 """
-__init__.py
+Github API Wrapper
+~~~~~~~~~~~~~~~~~~~
+
+A basic wrapper for the Github API.
+
+:copyright: (c) 2024-present Akami
+:license: MIT, see LICENSE for more details.
 """
 from .user import *
 from .repository import *

@@ -1,4 +1,4 @@
-# GitHub API Client
+# pyGithub
 
 A Python client for interacting with the GitHub API, providing features like fetching user information, searching repositories, and managing issues and pull requests.
 
@@ -22,18 +22,12 @@ pip install -r requirements.txt
 
 ## Example
 
-```
+```python
 from pyGithub import Client
 
-token = "YOUR_GITHUB_TOKEN"
+token = "YOUR_GITHUB_TOKEN" # Completely optional
 client = Client(token)
 
-# Fetch user information
 user = client.get_user("octocat")
 print(user)
-
-# Search for repositories
-repos = client.search_repos("python")
-for repo in repos:
-    print(repo.full_name)
 ```
