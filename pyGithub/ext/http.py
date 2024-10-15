@@ -38,281 +38,383 @@ from pyGithub.ext.exceptions import (
 )
 
 
+class Route:
+    """
+    Represents an API route with method and path.
+
+    """
+    def __init__(self, method: str, path: str, token: Optional[str] = None) -> None:
+        self.method = method
+        self.path = path
+        self.token = token
+
+
 class Http:
     """
     Requests manager for the GitHub API.
-    This class handles the API requests and responses for various GitHub functionalities.
+
     """
     def __init__(self) -> None:
-        """
-        Initializes the Http instance, setting the base URL for the GitHub API.
-        """
         self.base: str = "https://api.github.com"
 
 
-    def request(
-        self,
-        method: str,
-        endpoint: str,
-        token: Optional[str] = None,
-        **kwargs: Any
-    ) -> json:
-        """
-        Makes an API request to the GitHub API.
-
-        Args:
-            method (str): The HTTP method to use (GET, POST, etc.).
-            endpoint (str): The specific API endpoint to call.
-            token (Optional[str]): An optional personal access token for authentication.
-            **kwargs: Additional parameters to pass to the request.
-
-        Returns:
-            json: The response data in JSON format.
-
-        Raises:
-            NotFound: If the endpoint does not exist (404).
-            Unauthorized: If authentication fails (401).
-            Forbidden: If access is denied (403).
-            BadRequest: If the request is malformed (400).
-        """
-        r = requests.request(
-            method=method,
-            url=f"{self.base}/{endpoint}",
+    def request(self, route: Route, **kwargs: Any) -> json:
+        response = requests.request(
+            method = route.method,
+            url=f"{self.base}{route.path}",
             headers={
                 "Accept": "application/vnd.github.v3+json",
-                "Authorization": f"token {token}" if token else None
+                "Authorization": f"token {route.token}" if route.token else None
             },
             **kwargs
         )
-        if r.status_code == 404:
-            raise NotFound(
-                f"Endpoint '{endpoint}' not found."
-            )
-        elif r.status_code == 401:
-            raise Unauthorized(
-                "Invalid or missing authentication token."
-            )
-        elif r.status_code == 403:
-            raise Forbidden(
-                "You do not have permission to access this resource."
-            )
-        elif r.status_code == 400:
-            raise BadRequest(
-                "The request was malformed."
-            )
-
-        return r.json()
+        return self.handle(response)
 
 
-    def fetch_user(
-        self, 
-        username: str,
-        token: str
-    ) -> User:
-        """
-        Fetches user data from GitHub.
-
-        Args:
-            username (str): The username of the GitHub user to fetch.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            User: A User object containing the user's data.
-        """
+    def fetch_user(self, username: str, token: str) -> User:
         user_data = self.request(
-            method="GET",
-            endpoint=f"users/{username}",
-            token=token
+            Route(
+                'GET', 
+                f"/users/{username}", 
+                token
+            )
         )
         return User(user_data)
 
 
-    def fetch_repo(
-        self, 
-        owner: str, 
-        repo_name: str,
-        token: str
-    ) -> Repository:
-        """
-        Fetches repository data from GitHub.
 
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            Repository: A Repository object containing the repository's data.
-        """
+    def fetch_repo(self, owner: str, repo_name: str, token: str) -> Repository:
         repository_data = self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}",
-            token=token
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}",
+                token=token
+            )
         )
         return Repository(repository_data)
 
 
-    def search_repositories(
-        self, 
-        query: str,
-        token: str
+    def search_repositories(self, query: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/search/repositories?q={query}",
+                token=token
+            )
+        )
+
+
+    def fetch_issues(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/issues",
+                token=token
+            )
+        )
+
+
+    def fetch_pull_requests(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/pulls",
+                token=token
+            )
+        )
+
+
+    def fetch_commits(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/commits",
+                token=token
+            )
+        )
+
+
+    def fetch_branches(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/branches",
+                token=token
+            )
+        )
+
+
+    def fetch_releases(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/releases",
+                token=token
+            )
+        )
+
+
+    def fetch_contributors(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/contributors",
+                token=token
+            )
+        )
+
+
+    def fetch_issue(self, owner: str, repo_name: str, issue_number: int, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/issues/{issue_number}",
+                token=token
+            )
+        )
+
+
+    def create_issue(
+        self,
+        token: str, 
+        owner: str, 
+        repo_name: str, 
+        title: str, 
+        body: Optional[str] = None
     ) -> dict:
-        """
-        Searches for repositories based on a query.
-
-        Args:
-            query (str): The search query string.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            dict: A dictionary containing search results.
-        """
         return self.request(
-            method="GET",
-            endpoint=f"search/repositories?q={query}",
-            token=token
+            Route(
+                method='POST',
+                path=f"/repos/{owner}/{repo_name}/issues",
+                token=token
+            ),
+            json={"title": title, "body": body}
         )
 
 
-    def fetch_issues(
-        self, 
+    def fetch_milestones(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/milestones",
+                token=token
+            )
+        )
+
+
+    def create_milestone(
+        self,
+        token: str,
         owner: str, 
         repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches issues for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the issues.
-        """
+        title: str,
+        description: Optional[str] = None, 
+        due_on: Optional[str] = None
+    ) -> dict:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/issues",
-            token=token
+            Route(
+                method='POST',
+                path=f"/repos/{owner}/{repo_name}/milestones",
+                token=token
+            ),
+            json={"title": title, "description": description, "due_on": due_on}
         )
 
 
-    def fetch_pull_requests(
-        self, 
+    def fetch_labels(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/labels",
+                token=token
+            )
+        )
+
+
+    def create_label(self, owner: str, repo_name: str, name: str, color: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='POST',
+                path=f"/repos/{owner}/{repo_name}/labels",
+                token=token
+            ),
+            json={"name": name, "color": color}
+        )
+
+
+    def fetch_events(self, owner: str, repo_name: str, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/events",
+                token=token
+            )
+        )
+
+
+    def fetch_commit(self, owner: str, repo_name: str, commit_sha: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/commits/{commit_sha}",
+                token=token
+            )
+        )
+
+
+    def fetch_release(self, owner: str, repo_name: str, release_id: int, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/releases/{release_id}",
+                token=token
+            )
+        )
+
+
+    def create_release(
+        self,
+        token: str, 
         owner: str, 
-        repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches pull requests for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the pull requests.
-        """
+        repo_name: str, 
+        tag_name: str, 
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        draft: bool = False,
+        prerelease: bool = False
+    ) -> dict:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/pulls",
-            token=token
+            Route(
+                method='POST',
+                path=f"/repos/{owner}/{repo_name}/releases",
+                token=token
+            ),
+            json={
+                "tag_name": tag_name, 
+                "name": name, 
+                "body": body,
+                "draft": draft,
+                "prerelease": prerelease
+            }
         )
 
 
-    def fetch_commits(
-        self, 
-        owner: str, 
-        repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches commits for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the commits.
-        """
+    def fetch_forks(self, owner: str, repo_name: str, token: str) -> list[dict]:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/commits",
-            token=token
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/forks",
+                token=token
+            )
         )
 
 
-    def fetch_branches(
-        self, 
-        owner: str, 
-        repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches branches for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the branches.
-        """
+    def fetch_stargazers(self, owner: str, repo_name: str, token: str) -> list[dict]:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/branches",
-            token=token
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/stargazers",
+                token=token
+            )
         )
 
 
-    def fetch_releases(
-        self, 
-        owner: str, 
-        repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches releases for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the releases.
-        """
+    def fetch_watched_repos(self, token: str) -> list[dict]:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/releases",
-            token=token
+            Route(
+                method='GET',
+                path="/user/subscriptions",
+                token=token
+            )
         )
 
 
-    def fetch_contributors(
-        self, 
-        owner: str, 
-        repo_name: str,
-        token: str
-    ) -> list[dict]:
-        """
-        Fetches contributors for a repository.
-
-        Args:
-            owner (str): The username of the repository owner.
-            repo_name (str): The name of the repository.
-            token (str): The personal access token for authentication.
-
-        Returns:
-            list[dict]: A list of dictionaries representing the contributors.
-        """
+    def fetch_repositories_for_user(self, username: str, token: str) -> list[dict]:
         return self.request(
-            method="GET",
-            endpoint=f"repos/{owner}/{repo_name}/contributors",
-            token=token
+            Route(
+                method='GET',
+                path=f"/users/{username}/repos",
+                token=token
+            )
         )
+
+
+    def fetch_notifications(self, token: str) -> list[dict]:
+        return self.request(
+            Route(
+                method='GET',
+                path="/notifications",
+                token=token
+            )
+        )
+
+
+    def mark_notifications_as_read(self, token: str) -> dict:
+        return self.request(
+            Route(
+                method='PUT',
+                path="/notifications",
+                token=token
+            )
+        )
+
+
+    def fetch_repo_topics(self, owner: str, repo_name: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/topics",
+                token=token
+            )
+        )
+
+
+    def replace_repo_topics(self, owner: str, repo_name: str, names: list[str], token: str) -> dict:
+        return self.request(
+            Route(
+                method='PUT',
+                path=f"/repos/{owner}/{repo_name}/topics",
+                token=token
+            ),
+            json={"names": names}
+        )
+
+
+    def fetch_traffic_views(self, owner: str, repo_name: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/traffic/views",
+                token=token
+            )
+        )
+
+
+    def fetch_traffic_clones(self, owner: str, repo_name: str, token: str) -> dict:
+        return self.request(
+            Route(
+                method='GET',
+                path=f"/repos/{owner}/{repo_name}/traffic/clones",
+                token=token
+            )
+        )
+
+
+    def handle(self, response: requests.Response) -> json:
+        if response.status_code == 404:
+            raise NotFound(
+                f"Endpoint '{response.url}' not found."
+            )
+        elif response.status_code == 401:
+            raise Unauthorized(
+                "Invalid or missing authentication token."
+            )
+        elif response.status_code == 403:
+            raise Forbidden(
+                "You do not have permission to access this resource."
+            )
+        elif response.status_code == 400:
+            raise BadRequest(
+                "The request was malformed."
+            )
+        return response.json()

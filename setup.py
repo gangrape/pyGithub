@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="pyGithub",
-    version="0.1.0",
+    version="0.2.0",
     author="Akami Yen",
     author_email="none@none.com",
     description="A simple Github API wrapper",
